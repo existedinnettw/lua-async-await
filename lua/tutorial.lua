@@ -1,6 +1,7 @@
 local a = require "async"
 local co = coroutine
-local uv = vim.loop
+--local uv = vim.loop
+local uv = require('luv')
 
 
 --#################### ########### ####################
@@ -77,8 +78,8 @@ local async_tasks_2 = function (val)
   return a.sync(function ()
     -- await all
     local w, z = a.wait_all{e2(val, val + 1), e2(val + 2, val + 3)}
-    print(unpack(w))
-    print(unpack(z))
+    print(table.unpack(w))
+    print(table.unpack(z))
     return function ()
       return 4
     end

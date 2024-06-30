@@ -31,7 +31,7 @@ local wrap = function (func)
     local params = {...}
     local thunk = function (step)
       table.insert(params, step)
-      return func(unpack(params))
+      return func(table.unpack(params))
     end
     return thunk
   end
@@ -41,7 +41,7 @@ end
 
 -- many thunks -> single thunk
 local join = function (thunks)
-  local len = table.getn(thunks)
+  local len = #thunks
   local done = 0
   local acc = {}
 
@@ -55,7 +55,7 @@ local join = function (thunks)
         acc[i] = {...}
         done = done + 1
         if done == len then
-          step(unpack(acc))
+          step(table.unpack(acc))
         end
       end
       tk(callback)

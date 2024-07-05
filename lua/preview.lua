@@ -28,11 +28,46 @@ local sleep_for_t = function(ms, callback)
 end
 local sleep_for = a.wrap(sleep_for_t)
 
+local tcp_req_t = function(callback)
 
+    local client = uv.new_tcp()
+    uv.tcp_connect(client, "45.79.112.203", 4242, function(err)
+        assert(not err, err)
+
+        uv.read_start(client, function(err, chunk)
+            print("received at client:", chunk)
+            assert(not err, err)
+            if chunk then
+                uv.shutdown(client)
+                print("client done shutting down")
+            else
+                uv.close(client)
+                callback() --this will continue subsequence, iff cb finished
+            end
+            -- callback() --error
+        end)
+
+        uv.write(client, "Hello\n", function(err)
+            print("write `Hello` complete")
+        end)
+        uv.write(client, "World\n")
+
+        print("writing from client")
+        -- callback()
+    end)
+end
+local tcp_req = a.wrap(tcp_req_t)
 
 local task_0 = function()
     return a.sync(function()
         print("task_0 done")
+    end)
+end
+
+local task_01s = function()
+    return a.sync(function()
+        a.wait(sleep_for(100))
+        print("task_01s done")
     end)
 end
 
@@ -60,7 +95,9 @@ end
 
 local left_branch = function()
     return a.sync(function()
-        a.wait(task_03s())
+        a.wait(tcp_req())
+        a.wait(task_01s())
+        -- a.wait(task_03s())
         a.wait(task_06s())
     end)
 end
